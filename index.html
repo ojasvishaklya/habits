@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1e1e1e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Habits">
+  <title>Habits</title>
+
+  <!-- Favicon & PWA -->
+  <link rel="icon" type="image/svg+xml" href="icons/habit-icon.svg">
+  <link rel="apple-touch-icon" href="icons/habit-icon.svg">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- App Header (sticky top bar) -->
+  <header class="app-header" id="appHeader">
+    <div class="header-inner">
+      <h1 class="header-title">Habits</h1>
+      <div class="header-chips" id="headerChips">
+        <span class="streak-chip" id="streakChip">
+          <i class="bi bi-fire"></i> <span id="streakCount">0</span>
+        </span>
+        <span class="month-chip" id="monthChip">
+          <i class="bi bi-check2-circle"></i> <span id="monthCount">0</span> this month
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== GRID SCREEN ==================== -->
+  <section class="screen active" id="screenGrid">
+    <!-- Day-of-week column headers (sticky below app header) -->
+    <div class="grid-col-headers" id="gridColHeaders">
+      <span>M</span><span>T</span><span>W</span>
+      <span>T</span><span>F</span><span>S</span><span>S</span>
+    </div>
+
+    <!-- Scrollable matrix -->
+    <div class="grid-scroll-area" id="gridScrollArea">
+      <div class="habit-grid" id="habitGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== HABITS SCREEN ==================== -->
+  <section class="screen" id="screenHabits">
+    <div class="screen-scroll">
+      <div class="section-header">
+        <h2 class="section-title"><i class="bi bi-list-check"></i> My Habits</h2>
+      </div>
+      <div id="habitList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+    <!-- FAB -->
+    <button class="fab" id="addHabitFab" aria-label="Add habit">
+      <i class="bi bi-plus-lg"></i>
+    </button>
+  </section>
+
+  <!-- ==================== STATS SCREEN ==================== -->
+  <section class="screen" id="screenStats">
+    <div class="screen-scroll">
+      <div class="section-header">
+        <h2 class="section-title"><i class="bi bi-bar-chart-line"></i> Statistics</h2>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="stats-summary-grid" id="statsSummary">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Per-habit breakdown -->
+      <div class="stats-habits-section">
+        <h3 class="stats-sub-title">Per Habit</h3>
+        <div id="statsHabitList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== BOTTOM NAVIGATION ==================== -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" id="tabGrid" data-tab="grid" aria-label="Grid view">
+      <i class="bi bi-grid-3x3"></i>
+      <span>Grid</span>
+    </button>
+    <button class="nav-item" id="tabHabits" data-tab="habits" aria-label="Habits">
+      <i class="bi bi-list-check"></i>
+      <span>Habits</span>
+    </button>
+    <button class="nav-item" id="tabStats" data-tab="stats" aria-label="Statistics">
+      <i class="bi bi-bar-chart-line"></i>
+      <span>Stats</span>
+    </button>
+    <button class="nav-item" id="tabMore" data-tab="more" aria-label="More options">
+      <i class="bi bi-three-dots"></i>
+      <span>More</span>
+    </button>
+  </nav>
+
+  <!-- ==================== MORE MENU ==================== -->
+  <div class="dropdown-menu-popup" id="moreMenu" style="display:none;">
+    <a class="dropdown-item" href="#" id="exportBtn">
+      <i class="bi bi-download"></i> Export Data
+    </a>
+    <a class="dropdown-item" href="#" id="importBtn">
+      <i class="bi bi-upload"></i> Import Data
+    </a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item text-danger" href="#" id="clearBtn">
+      <i class="bi bi-trash"></i> Clear All Data
+    </a>
+  </div>
+  <input type="file" id="importFile" accept=".json" style="display:none;">
+
+  <!-- ==================== SHEET BACKDROP ==================== -->
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+  <!-- ==================== DAY BOTTOM SHEET ==================== -->
+  <div class="bottom-sheet" id="daySheet" aria-modal="true" role="dialog" aria-label="Day log">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <span class="sheet-title" id="daySheetTitle">Wednesday, Feb 26</span>
+      <button class="sheet-close-btn" id="daySheetClose" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="sheet-body" id="daySheetBody">
+      <!-- Habit checklist populated by JS -->
+    </div>
+  </div>
+
+  <!-- ==================== ADD / EDIT HABIT SHEET ==================== -->
+  <div class="bottom-sheet" id="habitSheet" aria-modal="true" role="dialog" aria-label="Manage habit">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header">
+      <span class="sheet-title" id="habitSheetTitle">New Habit</span>
+      <button class="sheet-close-btn" id="habitSheetClose" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <form id="habitForm" autocomplete="off">
+
+        <!-- Name -->
+        <div class="form-group">
+          <label class="form-label" for="habitNameInput">Name</label>
+          <input
+            type="text"
+            id="habitNameInput"
+            class="form-input"
+            placeholder="e.g. Meditate"
+            maxlength="30"
+            required
+          >
+        </div>
+
+        <!-- Color -->
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <div class="color-picker" id="colorPicker">
+            <!-- Swatches populated by JS -->
+          </div>
+        </div>
+
+        <!-- Icon -->
+        <div class="form-group">
+          <label class="form-label">Icon</label>
+          <div class="icon-picker" id="iconPicker">
+            <!-- Icons populated by JS -->
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="sheet-actions">
+          <button type="submit" class="btn btn-success" id="habitSaveBtn">
+            <i class="bi bi-check-lg"></i> Save Habit
+          </button>
+          <button type="button" class="btn btn-outline-danger" id="habitDeleteBtn" style="display:none;">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- App -->
+  <script src="js/app.js"></script>
+</body>
+</html>
